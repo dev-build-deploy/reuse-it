@@ -11,6 +11,14 @@ Files: test/debian/*
 Copyright: 2023 Kevin de Jong <monkaii@hotmail.com>
 License: MIT
 
+Files: test/license/*
+Copyright: 2023 Kevin de Jong <monkaii@hotmail.com>
+License: MIT
+
+Files: test/bulk/*
+Copyright: 2023 Kevin de Jong <monkaii@hotmail.com>
+License: MIT
+
 Files: tsconfig*.json
 Copyright: 2023 Kevin de Jong <monkaii@hotmail.com>
 License: CC0-1.0
