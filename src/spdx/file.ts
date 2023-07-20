@@ -9,9 +9,7 @@ import * as crypto from "crypto";
 import * as fs from "fs";
 import * as parser from "../parser";
 
-/**
- * @internal
- */
+/** @internal */
 export const DEP5_FILE_PATH = ".reuse/dep5";
 
 const fileTypes = [
@@ -83,7 +81,17 @@ export class File {
     ]
   }
 
+  /**
+   * Create a SPDX file from the provided file path
+   * @param file The file path to create the SPDX file from
+   * @returns The SPDX file
+   */
   static async fromFile(file: string): Promise<File> {
+    /**
+     * Updates the SPDX file with information the Debian Configuration file
+     * @param file The SPDX file to update
+     * @returns The updated SPDX file
+     */
     function parseDebianFile(file: File) {        
       const dep5 = debian.DebianCopyright.fromFile(DEP5_FILE_PATH);
       if (dep5.header.copyright) {
@@ -106,6 +114,11 @@ export class File {
       return file;
     }
 
+    /**
+     * Updates the SPDX file with information provided as File tags
+     * @param file The SPDX file to update
+     * @returns The updated SPDX file
+     */
     async function parseFile(file: File): Promise<File> {
       for await (const comment of commentIt.extractComments(file.fileName, { maxLines: 50 })) {
         for await (const token of parser.extractData(comment)) {
