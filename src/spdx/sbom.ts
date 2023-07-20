@@ -6,6 +6,27 @@ SPDX-License-Identifier: MIT
 import { File } from "./file";
 import { IRelationship } from "./relationship";
 
+/**
+ * SPDX Software Bill of Materials (SBOM)
+ * 
+ * By default the following values are set:
+ * - SPDX ID: SPDXRef-DOCUMENT
+ * - SPDX Version: SPDX-2.3
+ * - Document Namespace: http://spdx.org/spdxdocs/spdx-v2.3-45eae250-b782-46dd-9723-62ec3bed2a7c
+ * - Data License: CC0-1.0
+ * 
+ * @class SoftwareBillOfMaterials
+ * @member SPDXID The SPDX ID of the element
+ * @member spdxVersion The SPDX version
+ * @member name The name of the SBOM
+ * @member documentNamespace The namespace of the SBOM
+ * @member dataLicense The license of the SBOM itself
+ * @member creationInfo The creation information of the SBOM
+ * @member relationships The relationships between the document and its elements
+ * @member files The files associated with thethe SBOM
+ * @see https://spdx.github.io/spdx-spec/2-document-creation-information/
+ * @see https://spdx.github.io/spdx-spec/3-relationships-between-SPDX-elements/
+ */
 export class SoftwareBillOfMaterials {
   readonly SPDXID = "SPDXRef-DOCUMENT";
   readonly spdxVersion = "SPDX-2.3";
@@ -29,6 +50,11 @@ export class SoftwareBillOfMaterials {
     }
   }
 
+  /**
+   * Adds a file to the SBOM.
+   * Additionally, this will create a DESCRIBES relationship between the SBOM and the file.
+   * @param file The file to add
+   */
   async addFile(file: string) {
     const spdxFile = await File.fromFile(file)
     this.files.push(spdxFile);

@@ -11,6 +11,7 @@ SPDX-License-Identifier: MIT
  * @member relationshipType The type of relationship
  * @member relatedSpdxElement The SPDX ID of the related element
  * @see https://spdx.github.io/spdx-spec/3-relationships-between-SPDX-elements/
+ * @internal
  */
 export interface IRelationship {
   /** The SPDX ID of the element */
