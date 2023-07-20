@@ -53,9 +53,17 @@ export class SoftwareBillOfMaterials {
   /**
    * Adds a file to the SBOM.
    * Additionally, this will create a DESCRIBES relationship between the SBOM and the file.
+   * 
+   * NOTE: This will ignore any .license or dep5 files by default.
+   * 
    * @param file The file to add
    */
   async addFile(file: string) {
+    // Ignore any .license or dep5 files by default
+    if (file.endsWith(".license") || file.endsWith(".reuse/dep5")) {
+      return;
+    }
+
     const spdxFile = await File.fromFile(file)
     this.files.push(spdxFile);
     this.relationships.push({
@@ -63,5 +71,18 @@ export class SoftwareBillOfMaterials {
       relationshipType: "DESCRIBES",
       relatedSpdxElement: spdxFile.SPDXID
     })
+  }
+
+  /**
+   * Adds multiple files in bulk to the SBOM.
+   * 
+   * @param files List of files to add
+   */
+  async addFiles(files: string[]) {
+    const promises: Promise<void>[] = [];
+    files.forEach(file => {
+      promises.push(this.addFile(file))
+    });
+    await Promise.all(promises);
   }
 }

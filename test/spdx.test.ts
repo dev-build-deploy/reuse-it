@@ -41,6 +41,23 @@ describe("SPDX", () => {
     }
   });
 
+  test("Validate Software Bill of Materials (bulk)", async () => {
+    const fixture = JSON.parse(fs.readFileSync(`test/bulk/sbom.fixture`, "utf8"));
+
+    Object.defineProperty(spdxFile, "DEP5_FILE_PATH", { value: "test/debian/header.dep5" });
+    const sbom = new reuseIt.SoftwareBillOfMaterials("test-project", "ReuseIt-v0");
+    await sbom.addFiles(["test/fixtures/full-file.ts", "test/fixtures/minimal-file.ts"]);
+
+    expect(JSON.parse(JSON.stringify(sbom))).toStrictEqual(fixture);
+  });
+
+  test("Validate Software Bill of Materials (adding license file)", async () => {
+    const sbom = new reuseIt.SoftwareBillOfMaterials("test-project", "ReuseIt-v0");
+    await sbom.addFile("test.license");
+
+    expect(sbom.files.length).toBe(0);
+  });
+
   test("Validate Debian Copyright configuration (stanza)", async () => {
     const fixture = JSON.parse(fs.readFileSync(`test/fixtures/missing-info.ts.debian.fixture`, "utf8"));
     const file = `test/fixtures/missing-info.ts`;
@@ -57,6 +74,17 @@ describe("SPDX", () => {
     const file = `test/fixtures/missing-info.ts`;
 
     Object.defineProperty(spdxFile, "DEP5_FILE_PATH", { value: "test/debian/filestanza.dep5" });
+    const sbom = new reuseIt.SoftwareBillOfMaterials("test-project", "ReuseIt-v0");
+    await sbom.addFile(file);
+
+    expect(JSON.parse(JSON.stringify(sbom))).toStrictEqual(fixture);
+  });
+
+  test("Validate License file", async () => {
+    const fixture = JSON.parse(fs.readFileSync(`test/license/missing-info.ts.fixture`, "utf8"));
+    const file = `test/license/missing-info.ts`;
+
+    Object.defineProperty(spdxFile, "DEP5_FILE_PATH", { value: "does-not-exist" });
     const sbom = new reuseIt.SoftwareBillOfMaterials("test-project", "ReuseIt-v0");
     await sbom.addFile(file);
 

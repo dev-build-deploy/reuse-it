@@ -82,7 +82,12 @@ export class File {
   }
 
   /**
-   * Create a SPDX file from the provided file path
+   * Create a SPDX file from the provided file path, and update it with information from (in order of precedence):
+   * 
+   * 1. The Debian Configuration file
+   * 2. The .license file
+   * 3. File tags provided in comment blocks in the file
+   * 
    * @param file The file path to create the SPDX file from
    * @returns The SPDX file
    */
@@ -115,56 +120,99 @@ export class File {
     }
 
     /**
+     * Update the SPDX file with information provided in the .license file
+     * @param file The SPDX file to update
+     * @returns The updated SPDX file
+     */
+    async function parseLicenseFile(file: File) {
+      const content = fs.readFileSync(`${file.fileName}.license`, "utf-8");
+
+      const comment: commentIt.IComment = {
+        type: "multiline",
+        format: { start: "", end: "" },
+        contents: []
+      }
+
+      let index = 0;
+      for (const line of content.split("\n")) {
+        comment.contents.push({
+          line: index,
+          column: { start: 0, end: line.length },
+          value: line
+        });
+        index += 1;
+      }
+
+      return await parseComment(comment, file);
+    }
+
+    /**
      * Updates the SPDX file with information provided as File tags
      * @param file The SPDX file to update
      * @returns The updated SPDX file
      */
     async function parseFile(file: File): Promise<File> {
       for await (const comment of commentIt.extractComments(file.fileName, { maxLines: 50 })) {
-        for await (const token of parser.extractData(comment)) {
-          switch (token.type) {
-            case "attributionText":
-              spdxFile.attributionTexts.push(token.data);
-              break;
-            case "comment":
-              spdxFile.comment = token.data;
-              break;
-            case "contributor":
-              spdxFile.fileContributors.push(token.data);
-              break;
-            case "licenseComments":
-              spdxFile.licenseComments = token.data;
-              break;
-            case "licenseConcluded":
-              spdxFile.licenseConcluded = token.data;
-              break;
-            case "copyright":
-              spdxFile.copyrightText = token.data;
-              break;
-            case "notice":
-              spdxFile.noticeText = token.data;
-              break;
-            case "type":
-              spdxFile.fileTypes.push(token.data as IFileType);
-              break;
-            case "licenseInfoInFile":
-            case "license": {
-              if (spdxFile.licenseInfoInFiles.includes("NOASSERTION")) {
-                spdxFile.licenseInfoInFiles = [token.data];
-              } else {
-                spdxFile.licenseInfoInFiles.push(token.data);
-              }
-              break;
+        file = await parseComment(comment, file);
+      }
+      return file;
+    }
+
+    /**
+     * Parses the SPDX File and ReUSE tokens from the provided comment
+     * @param comment Comment to parse
+     * @param file SPDX File to update
+     * @returns The updated SPDX file
+     */
+    async function parseComment(comment: commentIt.IComment, file: File) {
+      for await (const token of parser.extractData(comment)) {
+        switch (token.type) {
+          case "attributionText":
+            file.attributionTexts.push(token.data);
+            break;
+          case "comment":
+            file.comment = token.data;
+            break;
+          case "contributor":
+            file.fileContributors.push(token.data);
+            break;
+          case "licenseComments":
+            file.licenseComments = token.data;
+            break;
+          case "licenseConcluded":
+            file.licenseConcluded = token.data;
+            break;
+          case "copyright":
+            file.copyrightText = token.data;
+            break;
+          case "notice":
+            file.noticeText = token.data;
+            break;
+          case "type":
+            file.fileTypes.push(token.data as IFileType);
+            break;
+          case "licenseInfoInFile":
+          case "license": {
+            if (file.licenseInfoInFiles.includes("NOASSERTION")) {
+              file.licenseInfoInFiles = [token.data];
+            } else {
+              file.licenseInfoInFiles.push(token.data);
             }
+            break;
           }
         }
       }
-      return spdxFile;
+      return file;
     }
+
 
     let spdxFile = new File(file);
     if (fs.existsSync(DEP5_FILE_PATH)) {
       spdxFile = parseDebianFile(spdxFile);
+    }
+
+    if (fs.existsSync(`${file}.license`)) {
+      spdxFile = await parseLicenseFile(spdxFile);
     }
     
     if (commentIt.isSupported(file)) {
