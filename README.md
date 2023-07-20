@@ -58,7 +58,7 @@ This will result in an SPDX 2.3 SBoM;
   ],
   "files": [
     {
-      "checksum": [
+      "checksums": [
         {
           "algorithm": "SHA1",
           "checksumValue": "32ac7ea6fbf35e1a03662715a1a345ccc569d05d"
