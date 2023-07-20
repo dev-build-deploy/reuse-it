@@ -12,7 +12,7 @@
   ],
   "files": [
     {
-      "checksum": [
+      "checksums": [
         {
           "algorithm": "SHA1",
           "checksumValue": "0b567cf85e8bbe813b569ebcd6342c0fa9e290f3"
@@ -38,7 +38,7 @@
       "copyrightText": "2023 Kevin de Jong <monkaii@hotmail.com>",
       "comment": "This is a test file containing all File tags",
       "licenseComments": "The MIT license has been declared to allow for reuse",
-      "notice": "Notice Text"
+      "noticeText": "Notice Text"
     }
   ],
   "name": "test-project",

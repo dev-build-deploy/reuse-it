@@ -42,7 +42,7 @@ type IFileType = (typeof fileTypes)[number];
  * @member licenseComments License comments
  * @member licenseConcluded License concluded
  * @member licenseInfoInFiles License information in files
- * @member notice Notices
+ * @member noticeText Notices
  * @member attributionTexts Attribution texts
  * @internal
  */
@@ -54,7 +54,7 @@ export class File {
     annotator: string;
     comment?: string;
   }[];
-  checksum: {
+  checksums: {
     algorithm: string;
     checksumValue: string;
   }[] = [];
@@ -66,7 +66,7 @@ export class File {
   licenseComments?: string;
   licenseConcluded = "NOASSERTION";
   licenseInfoInFiles: string[] = ["NOASSERTION"];
-  notice?: string;
+  noticeText?: string;
   attributionTexts: string[] = []; // 0..*
 
   constructor(fileName: string) {
@@ -75,7 +75,7 @@ export class File {
 
     // Generate the checksum
     const contents = fs.readFileSync(this.fileName, "utf-8");
-    this.checksum = [
+    this.checksums = [
       {
         algorithm: "SHA1",
         checksumValue: crypto.createHash("SHA1").update(contents).digest("hex")
@@ -129,7 +129,7 @@ export class File {
               spdxFile.copyrightText = token.data;
               break;
             case "notice":
-              spdxFile.notice = token.data;
+              spdxFile.noticeText = token.data;
               break;
             case "type":
               spdxFile.fileTypes.push(token.data as IFileType);
