@@ -1,0 +1,7 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+License: MIT
+Copyright: 2023 Kevin de Jong <monkaii@hotmail.com>
+
+Files: test/fixtures/*.ts
+License: CC0-1.0
+Copyright: 2022 Kevin de Jong <monkaii@hotmail.com>

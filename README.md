@@ -39,6 +39,8 @@ await sbom.addFile("src/spdx/sbom.ts");
 console.log(JSON.stringify(sbom, null, 2))
 ```
 
+<details><summary>Example output</summary>
+
 This will result in an SPDX 2.3 SBoM;
 
 ```JSON
@@ -85,6 +87,8 @@ This will result in an SPDX 2.3 SBoM;
 }
 ```
 
+</details>
+
 ## Basic guidelines
 
 ### Adding licensing and copyright information to your file
@@ -103,7 +107,7 @@ SPDX-License-Identifier: MIT
 
 _Please refer to the [Reuse specification] for more details._
 
-> **NOTE**: Support for `.license` and `DEP5` is still under construction
+> **NOTE**: Support for `.license` files is still under construction
 
 ### Use SPDX File Tags to enrich your Software Bill of Materials
 To enrichen your SPDX 2.3 SBOM, additional [File Tags](https://spdx.github.io/spdx-spec/v2.3/file-tags/) can be used to add additional information to each file. For example:
@@ -142,7 +146,7 @@ function foo(bar: string) {
 
 ## Contributing
 
-If you have suggestions for how `reuse-it`` could be improved, or want to report a bug, open an issue! We'd love all and any contributions.
+If you have suggestions for how `reuse-it` could be improved, or want to report a bug, open an issue! We'd love all and any contributions.
 
 For more, check out the [Contributing Guide](CONTRIBUTING.md).
 
