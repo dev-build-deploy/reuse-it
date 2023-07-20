@@ -119,12 +119,12 @@ export class SpdxFile {
     }
 
     /**
-     * Update the SPDX file with information provided in the .license file
+     * Update the SPDX file with information provided in the plain text file
      * @param file The SPDX file to update
      * @returns The updated SPDX file
      */
-    async function parseLicenseFile(file: SpdxFile) {
-      const content = fs.readFileSync(`${file.fileName}.license`, "utf-8");
+    async function parsePlainFile(source: string, file: SpdxFile) {
+      const content = fs.readFileSync(source, "utf-8");
 
       const comment: commentIt.IComment = {
         type: "multiline",
@@ -211,11 +211,14 @@ export class SpdxFile {
     }
 
     if (fs.existsSync(`${file}.license`)) {
-      spdxFile = await parseLicenseFile(spdxFile);
+      spdxFile = await parsePlainFile(`${file}.license`, spdxFile);
     }
     
     if (commentIt.isSupported(file)) {
       spdxFile = await parseFile(spdxFile);
+    } else {
+      // Fallback to plain text file parsing in case we cannot parse the file comment blocks.
+      spdxFile = await parsePlainFile(file, spdxFile)
     }
 
     return spdxFile;
