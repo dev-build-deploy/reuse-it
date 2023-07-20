@@ -59,8 +59,8 @@ export class SoftwareBillOfMaterials {
    * @param file The file to add
    */
   async addFile(file: string) {
-    // Ignore any .license or dep5 files by default
-    if (file.endsWith(".license") || file.endsWith(".reuse/dep5")) {
+    // Ignore any .license, Debian Copyright or LICENSE files by default
+    if (file.endsWith(".license") || file.endsWith(".reuse/dep5") || file.includes("LICENSES/")) {
       return;
     }
 
