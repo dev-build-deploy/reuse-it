@@ -3,7 +3,7 @@ SPDX-FileCopyrightText: 2023 Kevin de Jong <monkaii@hotmail.com>
 SPDX-License-Identifier: MIT
 */
 
-import { File } from "./file";
+import { SpdxFile } from "./file";
 import { IRelationship } from "./relationship";
 
 /**
@@ -39,7 +39,7 @@ export class SoftwareBillOfMaterials {
     creators: string[]
   };
   relationships: IRelationship[] = [];
-  files: File[] = [];
+  files: SpdxFile[] = [];
 
   constructor(name: string, tool: string) {
     this.name = name;
@@ -64,7 +64,7 @@ export class SoftwareBillOfMaterials {
       return;
     }
 
-    const spdxFile = await File.fromFile(file)
+    const spdxFile = await SpdxFile.fromFile(file)
     this.files.push(spdxFile);
     this.relationships.push({
       spdxElementId: this.SPDXID,

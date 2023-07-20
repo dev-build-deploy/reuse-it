@@ -4,3 +4,4 @@ SPDX-License-Identifier: MIT
 */
 
 export { SoftwareBillOfMaterials } from "./spdx/sbom";
+export { SpdxFile } from "./spdx/file";
