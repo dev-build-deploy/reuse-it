@@ -7,6 +7,10 @@ Files: test/fixtures/*
 Copyright: 2023 Kevin de Jong <monkaii@hotmail.com>
 License: MIT
 
+Files: test/debian/*
+Copyright: 2023 Kevin de Jong <monkaii@hotmail.com>
+License: MIT
+
 Files: tsconfig*.json
 Copyright: 2023 Kevin de Jong <monkaii@hotmail.com>
 License: CC0-1.0
@@ -14,4 +18,3 @@ License: CC0-1.0
 Files: package*.json
 Copyright: 2023 Kevin de Jong <monkaii@hotmail.com>
 License: CC0-1.0
-

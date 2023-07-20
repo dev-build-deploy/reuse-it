@@ -4,9 +4,15 @@ SPDX-License-Identifier: MIT
 */
 
 import * as commentIt from "@dev-build-deploy/comment-it";
+import * as debian from "@dev-build-deploy/dep5-it";
 import * as crypto from "crypto";
 import * as fs from "fs";
 import * as parser from "../parser";
+
+/**
+ * @internal
+ */
+export const DEP5_FILE_PATH = ".reuse/dep5";
 
 const fileTypes = [
   "SOURCE",
@@ -24,6 +30,22 @@ const fileTypes = [
 
 type IFileType = (typeof fileTypes)[number];
 
+/**
+ * SPDX File
+ * @member SPDXID The SPDX ID of the file
+ * @member annotations Annotations
+ * @member checksum Checksums
+ * @member comment Comments
+ * @member contributors Contributors
+ * @member fileName The file name
+ * @member fileTypes The file types
+ * @member licenseComments License comments
+ * @member licenseConcluded License concluded
+ * @member licenseInfoInFiles License information in files
+ * @member notice Notices
+ * @member attributionTexts Attribution texts
+ * @internal
+ */
 export class File {
   SPDXID: string;
   annotations?: {
@@ -62,9 +84,30 @@ export class File {
   }
 
   static async fromFile(file: string): Promise<File> {
-    async function parseFile(file: string) {
-      const spdxFile = new File(file);
-      for await (const comment of commentIt.extractComments(file, { maxLines: 50 })) {
+    function parseDebianFile(file: File) {        
+      const dep5 = debian.DebianCopyright.fromFile(DEP5_FILE_PATH);
+      if (dep5.header.copyright) {
+        file.copyrightText = dep5.header.copyright;
+      }
+      if (dep5.header.license) {
+        file.licenseInfoInFiles = [dep5.header.license];
+      }
+      const stanza = dep5.getFileStanza(file.fileName.replace("./", ""));
+
+      if (stanza) {
+        if (stanza.copyright) {
+          file.copyrightText = stanza.copyright;
+        }
+        if (stanza.license) {
+          file.licenseInfoInFiles = [stanza.license];
+        }
+      }
+
+      return file;
+    }
+
+    async function parseFile(file: File): Promise<File> {
+      for await (const comment of commentIt.extractComments(file.fileName, { maxLines: 50 })) {
         for await (const token of parser.extractData(comment)) {
           switch (token.type) {
             case "attributionText":
@@ -107,19 +150,13 @@ export class File {
     }
 
     let spdxFile = new File(file);
+    if (fs.existsSync(DEP5_FILE_PATH)) {
+      spdxFile = parseDebianFile(spdxFile);
+    }
+    
     if (commentIt.isSupported(file)) {
-      spdxFile = await parseFile(file);
+      spdxFile = await parseFile(spdxFile);
     }
-
-    // License file takes precedence over the source file
-    if (fs.existsSync(`${file}.license`)) {
-      const licenseFile = await parseFile(`${file}.license`);
-      spdxFile.copyrightText = licenseFile.copyrightText;
-      spdxFile.licenseInfoInFiles = licenseFile.licenseInfoInFiles;
-    }
-
-    // Debian configuration takes precedence over the license file
-    // TODO: Add support for debian configuration
 
     return spdxFile;
   }
