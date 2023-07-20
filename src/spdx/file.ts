@@ -42,9 +42,8 @@ type IFileType = (typeof fileTypes)[number];
  * @member licenseInfoInFiles License information in files
  * @member noticeText Notices
  * @member attributionTexts Attribution texts
- * @internal
  */
-export class File {
+export class SpdxFile {
   SPDXID: string;
   annotations?: {
     annotationDate: string;
@@ -91,13 +90,13 @@ export class File {
    * @param file The file path to create the SPDX file from
    * @returns The SPDX file
    */
-  static async fromFile(file: string): Promise<File> {
+  static async fromFile(file: string): Promise<SpdxFile> {
     /**
      * Updates the SPDX file with information the Debian Configuration file
      * @param file The SPDX file to update
      * @returns The updated SPDX file
      */
-    function parseDebianFile(file: File) {        
+    function parseDebianFile(file: SpdxFile) {        
       const dep5 = debian.DebianCopyright.fromFile(DEP5_FILE_PATH);
       if (dep5.header.copyright) {
         file.copyrightText = dep5.header.copyright;
@@ -124,7 +123,7 @@ export class File {
      * @param file The SPDX file to update
      * @returns The updated SPDX file
      */
-    async function parseLicenseFile(file: File) {
+    async function parseLicenseFile(file: SpdxFile) {
       const content = fs.readFileSync(`${file.fileName}.license`, "utf-8");
 
       const comment: commentIt.IComment = {
@@ -151,7 +150,7 @@ export class File {
      * @param file The SPDX file to update
      * @returns The updated SPDX file
      */
-    async function parseFile(file: File): Promise<File> {
+    async function parseFile(file: SpdxFile): Promise<SpdxFile> {
       for await (const comment of commentIt.extractComments(file.fileName, { maxLines: 50 })) {
         file = await parseComment(comment, file);
       }
@@ -164,7 +163,7 @@ export class File {
      * @param file SPDX File to update
      * @returns The updated SPDX file
      */
-    async function parseComment(comment: commentIt.IComment, file: File) {
+    async function parseComment(comment: commentIt.IComment, file: SpdxFile) {
       for await (const token of parser.extractData(comment)) {
         switch (token.type) {
           case "attributionText":
@@ -206,7 +205,7 @@ export class File {
     }
 
 
-    let spdxFile = new File(file);
+    let spdxFile = new SpdxFile(file);
     if (fs.existsSync(DEP5_FILE_PATH)) {
       spdxFile = parseDebianFile(spdxFile);
     }
