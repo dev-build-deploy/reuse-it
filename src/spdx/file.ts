@@ -142,7 +142,17 @@ export class SpdxFile {
         index += 1;
       }
 
-      return await parseComment(comment, file);
+      let ignore = false;
+      for await (const token of parser.extractData(comment)) {
+        if (token.type === "ignore") {
+          ignore = token.data.startsWith("Start");
+        }
+        if (ignore) continue;
+
+        file = await updateFromToken(token, file);
+      }
+
+      return file;
     }
 
     /**
@@ -151,9 +161,19 @@ export class SpdxFile {
      * @returns The updated SPDX file
      */
     async function parseFile(file: SpdxFile): Promise<SpdxFile> {
+      let ignore = false;
+
       for await (const comment of commentIt.extractComments(file.fileName)) {
-        file = await parseComment(comment, file);
+        for await (const token of parser.extractData(comment)) {
+          if (token.type === "ignore") {
+            ignore = token.data.startsWith("Start");
+          }
+          if (ignore) continue;
+          
+          file = await updateFromToken(token, file);
+        }
       }
+
       return file;
     }
 
@@ -163,42 +183,40 @@ export class SpdxFile {
      * @param file SPDX File to update
      * @returns The updated SPDX file
      */
-    async function parseComment(comment: commentIt.IComment, file: SpdxFile) {
-      for await (const token of parser.extractData(comment)) {
-        switch (token.type) {
-          case "attributionText":
-            file.attributionTexts.push(token.data);
-            break;
-          case "comment":
-            file.comment = token.data;
-            break;
-          case "contributor":
-            file.fileContributors.push(token.data);
-            break;
-          case "licenseComments":
-            file.licenseComments = token.data;
-            break;
-          case "licenseConcluded":
-            file.licenseConcluded = token.data;
-            break;
-          case "copyright":
-            file.copyrightText = token.data;
-            break;
-          case "notice":
-            file.noticeText = token.data;
-            break;
-          case "type":
-            file.fileTypes.push(token.data as IFileType);
-            break;
-          case "licenseInfoInFile":
-          case "license": {
-            if (file.licenseInfoInFiles.includes("NOASSERTION")) {
-              file.licenseInfoInFiles = [token.data];
-            } else {
-              file.licenseInfoInFiles.push(token.data);
-            }
-            break;
+    async function updateFromToken(token: parser.ExtractedToken, file: SpdxFile) {
+      switch (token.type) {
+        case "attributionText":
+          file.attributionTexts.push(token.data);
+          break;
+        case "comment":
+          file.comment = token.data;
+          break;
+        case "contributor":
+          file.fileContributors.push(token.data);
+          break;
+        case "licenseComments":
+          file.licenseComments = token.data;
+          break;
+        case "licenseConcluded":
+          file.licenseConcluded = token.data;
+          break;
+        case "copyright":
+          file.copyrightText = token.data;
+          break;
+        case "notice":
+          file.noticeText = token.data;
+          break;
+        case "type":
+          file.fileTypes.push(token.data as IFileType);
+          break;
+        case "licenseInfoInFile":
+        case "license": {
+          if (file.licenseInfoInFiles.includes("NOASSERTION")) {
+            file.licenseInfoInFiles = [token.data];
+          } else {
+            file.licenseInfoInFiles.push(token.data);
           }
+          break;
         }
       }
       return file;
