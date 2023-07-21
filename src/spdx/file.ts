@@ -151,7 +151,7 @@ export class SpdxFile {
      * @returns The updated SPDX file
      */
     async function parseFile(file: SpdxFile): Promise<SpdxFile> {
-      for await (const comment of commentIt.extractComments(file.fileName, { maxLines: 50 })) {
+      for await (const comment of commentIt.extractComments(file.fileName)) {
         file = await parseComment(comment, file);
       }
       return file;
