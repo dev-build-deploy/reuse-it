@@ -3,9 +3,10 @@ SPDX-FileCopyrightText: 2023 Kevin de Jong <monkaii@hotmail.com>
 SPDX-License-Identifier: MIT
 */
 
+import * as fs from "fs";
+
 import * as reuseIt from "../src/index";
 import * as spdxFile from "../src/spdx/file";
-import * as fs from "fs";
 
 /**
  * Validates the SPDX header of a file.
