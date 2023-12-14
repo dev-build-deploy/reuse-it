@@ -137,7 +137,8 @@ export class SpdxFile {
         comment.contents.push({
           line: index,
           column: { start: 0, end: line.length },
-          value: line
+          value: line,
+          raw: line
         });
         index += 1;
       }
