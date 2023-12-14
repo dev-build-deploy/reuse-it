@@ -110,7 +110,7 @@ _Please refer to the [Reuse specification] for more details._
 > **NOTE**: Support for `.license` files is still under construction
 
 ### Use SPDX File Tags to enrich your Software Bill of Materials
-To enrichen your SPDX 2.3 SBOM, additional [File Tags](https://spdx.github.io/spdx-spec/v2.3/file-tags/) can be used to add additional information to each file. For example:
+To enrich your SPDX 2.3 SBOM, additional [File Tags](https://spdx.github.io/spdx-spec/v2.3/file-tags/) can be used to add additional information to each file. For example:
 
 <!-- REUSE-IgnoreStart -->
 ```yaml
