@@ -46,7 +46,7 @@
     "lib/*"
   ],
   "dependencies": {
-    "@dev-build-deploy/comment-it": "^1",
+    "@dev-build-deploy/comment-it": "^2",
     "@dev-build-deploy/dep5-it": "^0"
   }
 }
