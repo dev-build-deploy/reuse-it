@@ -56,7 +56,7 @@ function generateToken(line: string): Token | undefined {
     return {
       start: match.index,
       end: line.indexOf(SPDXTokens[key]) + SPDXTokens[key].length,
-      type: key as keyof typeof SPDXTokens,
+      type: key,
     };
   }
 }
