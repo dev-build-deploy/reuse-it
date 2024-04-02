@@ -126,7 +126,7 @@ export class SpdxFile {
     async function parsePlainFile(source: string, file: SpdxFile) {
       const content = fs.readFileSync(source, "utf-8");
 
-      const comment: commentIt.IComment = {
+      const comment: commentIt.Comment = {
         type: "multiline",
         format: { start: "", end: "" },
         contents: []

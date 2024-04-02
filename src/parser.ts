@@ -66,7 +66,7 @@ function generateToken(line: string): Token | undefined {
  * @param comment The comment to extract the data from
  * @internal
  */
-export function* extractData(comment: commentIt.IComment): Generator<ExtractedToken> {
+export function* extractData(comment: commentIt.Comment): Generator<ExtractedToken> {
   for (const line of comment.contents) {
     const match = generateToken(line.value);
     if (match) {
