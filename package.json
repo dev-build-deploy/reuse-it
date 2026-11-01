@@ -48,7 +48,7 @@
   ],
   "dependencies": {
     "@dev-build-deploy/comment-it": "^2",
-    "@dev-build-deploy/dep5-it": "^0",
+    "@dev-build-deploy/dep5-it": "^1",
     "smol-toml": "^1.9.1"
   }
 }
