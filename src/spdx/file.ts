@@ -9,9 +9,13 @@ import * as crypto from "crypto";
 import * as fs from "fs";
 
 import * as parser from "../parser";
+import { IAnnotation, findReuseTomls } from "../reuse-toml";
 
 /** @internal */
 export const DEP5_FILE_PATH = ".reuse/dep5";
+
+/** @internal */
+export const REUSE_TOML_FILE_NAME = "REUSE.toml";
 
 /** Number of leading bytes inspected to tell binary files from text files (as git does) */
 const BINARY_DETECTION_BYTES = 8000;
@@ -141,7 +145,11 @@ export class SpdxFile {
    *
    * 1. The file's own information: its adjacent .license file if it exists (the file's contents are then
    *    ignored), otherwise the SPDX tags in its comments (or in its text, for text files without comment support).
-   * 2. The last matching Files paragraph of .reuse/dep5, which is aggregated with the information above
+   * 2. REUSE.toml files in its directory and above, by the `precedence` of the matching tables:
+   *    `closest` (the default) only fills in what the file lacks, separately for copyright and licence, from the
+   *    closest REUSE.toml; `aggregate` adds the table to the file's information; `override` replaces everything
+   *    closer to the file, and the override table closest to the project root wins.
+   * 3. The last matching Files paragraph of .reuse/dep5, which is aggregated with the information above
    *    (both licences apply when they differ). The dep5 header paragraph describes the project as a whole
    *    and is not applied to files. A paragraph's Comment becomes the file's comment.
    *
@@ -234,6 +242,36 @@ export class SpdxFile {
     }
 
     /**
+     * Combines the file's own information with the matching REUSE.toml tables
+     * @param own The file's own Licensing Information
+     * @param annotations The matching tables, the one closest to the project root first
+     * @returns The combined Licensing Information
+     */
+    function applyReuseToml(own: Licensing, annotations: IAnnotation[]): Licensing {
+      const comments = (tables: IAnnotation[]) => tables.flatMap(table => (table.comment ? [table.comment] : []));
+
+      const override = annotations.find(table => table.precedence === "override");
+      if (override) {
+        return { copyrights: override.copyrights, licenses: override.licenses, comments: comments([override]) };
+      }
+
+      const aggregated = annotations.filter(table => table.precedence === "aggregate");
+      const closest = annotations[annotations.length - 1];
+      const useClosest = own.copyrights.length === 0 || own.licenses.length === 0;
+      return {
+        copyrights: [
+          ...aggregated.flatMap(table => table.copyrights),
+          ...(own.copyrights.length > 0 ? own.copyrights : closest.copyrights),
+        ],
+        licenses: [
+          ...aggregated.flatMap(table => table.licenses),
+          ...(own.licenses.length > 0 ? own.licenses : closest.licenses),
+        ],
+        comments: [...comments(aggregated), ...own.comments, ...(useClosest ? comments([closest]) : [])],
+      };
+    }
+
+    /**
      * Aggregates the matching dep5 Files paragraph with the Licensing Information
      * @param licensing The Licensing Information so far
      * @param path Path relative to the project root
@@ -267,6 +305,13 @@ export class SpdxFile {
     } else if (!isBinary(file)) {
       // Fallback to plain text file parsing in case we cannot parse the file comment blocks.
       await readComments([plainTextComment(file)], spdxFile, licensing);
+    }
+
+    const annotations = findReuseTomls(path, REUSE_TOML_FILE_NAME)
+      .map(toml => toml.getAnnotation(path))
+      .filter((annotation): annotation is IAnnotation => annotation !== undefined);
+    if (annotations.length > 0) {
+      licensing = applyReuseToml(licensing, annotations);
     }
 
     if (fs.existsSync(DEP5_FILE_PATH)) {

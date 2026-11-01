@@ -7,14 +7,17 @@ import * as crypto from "crypto";
 import * as fs from "fs";
 
 import * as reuseIt from "../src/index";
+import { isGlobMatch } from "../src/reuse-toml";
 import * as spdxFile from "../src/spdx/file";
 
 /**
- * Sets the path of the dep5 file used by the library.
+ * Sets the paths of the dep5 file and the REUSE.toml file name used by the library.
  * @param dep5 Path of the dep5 file
+ * @param reuseToml File name of the REUSE.toml files
  */
-function useConfiguration(dep5: string): void {
+function useConfiguration(dep5: string, reuseToml = "does-not-exist.toml"): void {
   Object.defineProperty(spdxFile, "DEP5_FILE_PATH", { value: dep5 });
+  Object.defineProperty(spdxFile, "REUSE_TOML_FILE_NAME", { value: reuseToml });
 }
 
 /**
@@ -75,6 +78,79 @@ describe("REUSE Specification", () => {
       copyrightText: "2025 Sidecar Holder",
       licenseInfoInFiles: ["CC0-1.0"],
       comment: undefined,
+    });
+  });
+
+  describe("REUSE.toml", () => {
+    beforeEach(() => useConfiguration("does-not-exist", "REUSE.test.toml"));
+
+    test("closest: the table applies when the file has no information", async () => {
+      expect(await licensingOf("test/spec/toml/closest/plain.txt")).toStrictEqual({
+        copyrightText: "2021 Outer Holder",
+        licenseInfoInFiles: ["MIT"],
+        comment: "Covered by the outer REUSE.toml.",
+      });
+    });
+
+    test("closest: copyright and licence fall back separately", async () => {
+      expect(await licensingOf("test/spec/toml/closest/own-license.ts")).toStrictEqual({
+        copyrightText: "2021 Outer Holder",
+        licenseInfoInFiles: ["CC0-1.0"],
+        comment: "Covered by the outer REUSE.toml.",
+      });
+    });
+
+    test("closest: the closest REUSE.toml wins", async () => {
+      expect(await licensingOf("test/spec/toml/closest/nested/deep/file.txt")).toStrictEqual({
+        copyrightText: "2024 Nested Holder",
+        licenseInfoInFiles: ["0BSD"],
+        comment: undefined,
+      });
+    });
+
+    test("aggregate: the table is combined with the file's information", async () => {
+      expect(await licensingOf("test/spec/toml/aggregate/notes.txt")).toStrictEqual({
+        copyrightText: "2022 Aggregate Holder\n2025 Own Holder",
+        licenseInfoInFiles: ["Apache-2.0", "MIT"],
+        comment: undefined,
+      });
+    });
+
+    test("override: the outermost table replaces everything closer to the file", async () => {
+      expect(await licensingOf("test/spec/toml/override/deep/file.ts")).toStrictEqual({
+        copyrightText: "2023 Override Holder",
+        licenseInfoInFiles: ["0BSD"],
+        comment: undefined,
+      });
+    });
+
+    test("The last matching table in a REUSE.toml wins", async () => {
+      expect((await licensingOf("test/spec/toml/last/a.txt")).licenseInfoInFiles).toStrictEqual(["BSD-3-Clause"]);
+      expect((await licensingOf("test/spec/toml/last/b.txt")).licenseInfoInFiles).toStrictEqual(["MIT"]);
+    });
+
+    test("Path globs follow the REUSE.toml matching rules", () => {
+      for (const [file, glob, expected] of [
+        ["a.txt", "*.txt", true],
+        ["dir/a.txt", "*.txt", false],
+        ["dir/a.txt", "**/*.txt", true],
+        ["a.txt", "**/*.txt", true],
+        ["dir/deep/a.txt", "dir/**", true],
+        ["dir/deep/a.txt", "**", true],
+        ["star*.txt", "star\\*.txt", true],
+        ["starry.txt", "star\\*.txt", false],
+        ["back\\slash", "back\\\\slash", true],
+        ["plain", "p\\lain", true],
+        ["a+b(c).txt", "a+b(c).txt", true],
+      ] as [string, string, boolean][]) {
+        expect(isGlobMatch(file, glob)).toBe(expected);
+      }
+    });
+
+    test("REUSE.toml files are not part of the SBOM", async () => {
+      const sbom = new reuseIt.SoftwareBillOfMaterials("test-project", "ReuseIt-v0");
+      await sbom.addFiles(["REUSE.toml", "sub/REUSE.toml", ".reuse/templates/default.jinja2", "LICENSE", "COPYING.md"]);
+      expect(sbom.files).toHaveLength(0);
     });
   });
 });

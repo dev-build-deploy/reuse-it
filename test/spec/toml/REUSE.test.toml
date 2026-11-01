@@ -1,0 +1,29 @@
+version = 1
+
+[[annotations]]
+path = "closest/**"
+SPDX-FileCopyrightText = "2021 Outer Holder"
+SPDX-License-Identifier = "MIT"
+SPDX-FileComment = "Covered by the outer REUSE.toml."
+
+[[annotations]]
+path = "aggregate/*.txt"
+precedence = "aggregate"
+SPDX-FileCopyrightText = ["2022 Aggregate Holder"]
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "override/**"
+precedence = "override"
+SPDX-FileCopyrightText = "2023 Override Holder"
+SPDX-License-Identifier = "0BSD"
+
+[[annotations]]
+path = ["last/*", "last/a.txt"]
+SPDX-FileCopyrightText = "2019 First Table"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "last/a.txt"
+SPDX-FileCopyrightText = "2019 Last Table"
+SPDX-License-Identifier = "BSD-3-Clause"
