@@ -1,0 +1,6 @@
+version = 1
+
+[[annotations]]
+path = "**"
+SPDX-FileCopyrightText = "2024 Nested Holder"
+SPDX-License-Identifier = "0BSD"
