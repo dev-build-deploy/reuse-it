@@ -1,0 +1,9 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+
+Files: *
+Copyright: 2023 Generic Holder
+License: MIT
+
+Files: test/spec/dep5/covered.txt
+Copyright: 2023 Specific Holder
+License: CC0-1.0

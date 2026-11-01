@@ -63,6 +63,15 @@ describe("REUSE Specification", () => {
       });
     });
 
+    test("The last matching Files paragraph wins", async () => {
+      useConfiguration("test/spec/dep5/last-match.dep5");
+      expect(await licensingOf("test/spec/dep5/covered.txt")).toStrictEqual({
+        copyrightText: "2023 Specific Holder",
+        licenseInfoInFiles: ["CC0-1.0"],
+        comment: undefined,
+      });
+    });
+
     test("DEP5 information is aggregated with the information in the file", async () => {
       expect(await licensingOf("test/spec/dep5/own-header.ts")).toStrictEqual({
         copyrightText: "2023 Stanza Holder\n2024 Own Holder",
