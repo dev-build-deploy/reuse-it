@@ -44,6 +44,15 @@ describe("REUSE Specification", () => {
     expect(spdx.checksums).toStrictEqual([{ algorithm: "SHA1", checksumValue: expected }]);
   });
 
+  test("Files recognised by name (dotfiles) are parsed", async () => {
+    useConfiguration("does-not-exist");
+    expect(await licensingOf("test/spec/dotfile/.gitattributes")).toStrictEqual({
+      copyrightText: "2026 Dotfile Holder",
+      licenseInfoInFiles: ["MIT"],
+      comment: undefined,
+    });
+  });
+
   describe("DEP5", () => {
     beforeEach(() => useConfiguration("test/spec/dep5/spec.dep5"));
 

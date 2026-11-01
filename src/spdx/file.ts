@@ -300,8 +300,9 @@ export class SpdxFile {
 
     if (fs.existsSync(`${file}.license`)) {
       await readComments([plainTextComment(`${file}.license`)], spdxFile, licensing);
-    } else if (commentIt.isSupported(file)) {
-      await readComments(commentIt.extractComments(spdxFile.fileName), spdxFile, licensing);
+    } else if (commentIt.isSupported(path)) {
+      // The same path for both calls: comment-it recognises some files by name (.gitattributes), not with "./"
+      await readComments(commentIt.extractComments(path), spdxFile, licensing);
     } else if (!isBinary(file)) {
       // Fallback to plain text file parsing in case we cannot parse the file comment blocks.
       await readComments([plainTextComment(file)], spdxFile, licensing);
