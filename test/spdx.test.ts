@@ -59,7 +59,7 @@ describe("SPDX", () => {
     expect(sbom.files.length).toBe(0);
   });
 
-  test("Validate Debian Copyright configuration (stanza)", async () => {
+  test("Validate Debian Copyright configuration (the header is not applied to files)", async () => {
     const fixture = JSON.parse(fs.readFileSync(`test/fixtures/missing-info.ts.debian.fixture`, "utf8"));
     const file = `test/fixtures/missing-info.ts`;
 
@@ -70,7 +70,7 @@ describe("SPDX", () => {
     expect(JSON.parse(JSON.stringify(sbom))).toStrictEqual(fixture);
   });
 
-  test("Validate Debian Copyright configuration (header)", async () => {
+  test("Validate Debian Copyright configuration (stanza)", async () => {
     const fixture = JSON.parse(fs.readFileSync(`test/fixtures/missing-info.ts.debian.stanza.fixture`, "utf8"));
     const file = `test/fixtures/missing-info.ts`;
 
